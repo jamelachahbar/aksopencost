@@ -731,38 +731,36 @@ kubectl delete namespace sample-app
 
 ## File Structure
 
-```
-aksopencost/
-├── .gitignore                         # Git ignore (excludes secrets)
-├── README.md                          # This documentation
-│
-├── 🚀 Deployment Scripts
-├── deploy-all.ps1                     # Single-command complete deployment
-├── deploy-aks-opencost.ps1            # AKS + Prometheus + OpenCost deployment
-├── setup-azure-cloud-costs.ps1        # Azure Cloud Costs integration (FinOps Toolkit)
-├── verify-deployment.ps1              # Deployment verification
-├── cleanup.ps1                        # Cleanup all Azure resources
-│
-├── 📊 Cost Management Scripts
-├── export-allocation-data.ps1         # Export allocation data to Azure Storage
-├── setup-allocation-export.ps1        # Setup automated export CronJob
-├── setup-cost-allocation.ps1          # Configure label-based cost allocation
-│
-├── 🧪 Testing & Samples
-├── generate-load.ps1                  # Deploy sample apps and generate load
-├── sample-app.yaml                    # Sample nginx/redis deployments
-├── load-generator.yaml                # Load generator manifests
-├── cost-allocation-labels.yaml        # Example workloads with cost labels
-│
-├── 📁 Generated Files (git-ignored)
-├── service-key.json                   # ⚠️ Service principal credentials
-├── cloud-integration.json             # ⚠️ Storage account key
-├── opencost-values.yaml               # Generated Helm values
-├── opencost-role.json                 # Azure custom role definition
-└── exports/                           # Exported allocation data
-```
+### ✅ Essential Files (Commit to Git)
 
-> ⚠️ **Security Note**: Files marked with ⚠️ contain secrets and are excluded from git via `.gitignore`.
+| File | Purpose | When to Use |
+|------|---------|-------------|
+| **deploy-all.ps1** | 🚀 **Main entry point** - deploys everything | `.\deploy-all.ps1` |
+| **deploy-aks-opencost.ps1** | AKS + Prometheus + OpenCost deployment | Step-by-step setup |
+| **setup-azure-cloud-costs.ps1** | Azure billing integration via FinOps Toolkit | After AKS deployment |
+| **setup-cost-allocation.ps1** | Apply team/project/cost-center labels | Cost attribution |
+| **export-allocation-data.ps1** | Export allocation data for Power BI | Manual exports |
+| **setup-allocation-export.ps1** | Automated export CronJob | Scheduled exports |
+| **verify-deployment.ps1** | Verify everything is working | Troubleshooting |
+| **cleanup.ps1** | Clean up all Azure resources | When done |
+| **generate-load.ps1** | Generate load for testing | Testing |
+| **sample-app.yaml** | Sample workload manifest | Testing |
+| **load-generator.yaml** | Load generator Kubernetes manifest | Load testing |
+| **cost-allocation-labels.yaml** | Example cost allocation labels | Reference |
+| **README.md** | This documentation | Reference |
+| **.gitignore** | Prevents secrets from being committed | Always |
+
+### 🚫 Generated Files (Do NOT Commit - Auto-Created)
+
+| File | Contains | Created By |
+|------|----------|------------|
+| **service-key.json** | ⚠️ Service principal credentials | `deploy-aks-opencost.ps1` |
+| **cloud-integration.json** | ⚠️ Storage account access key | `setup-azure-cloud-costs.ps1` |
+| **opencost-values.yaml** | Helm values (environment-specific) | `deploy-aks-opencost.ps1` |
+| **opencost-role.json** | Azure custom role definition | `deploy-aks-opencost.ps1` |
+| **exports/** | Exported allocation data files | `export-allocation-data.ps1` |
+
+> ⚠️ **Security Note**: All sensitive files are excluded from git via `.gitignore`. Never manually commit these files.
 
 ---
 
