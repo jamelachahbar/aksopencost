@@ -1,0 +1,84 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: load-generator
+  namespace: sample-app
+  labels:
+    app: load-generator
+spec:
+  containers:
+  - name: busybox
+    image: busybox:latest
+    command: ["/bin/sh"]
+    args: ["-c", "while true; do wget -q -O- http://nginx-sample-service.sample-app.svc.cluster.local > /dev/null 2>&1; done"]
+    resources:
+      requests:
+        cpu: "50m"
+        memory: "32Mi"
+      limits:
+        cpu: "100m"
+        memory: "64Mi"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stress-test
+  namespace: sample-app
+  labels:
+    app: stress-test
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: stress-test
+  template:
+    metadata:
+      labels:
+        app: stress-test
+    spec:
+      containers:
+      - name: stress
+        image: progrium/stress
+        command: ["stress"]
+        args: ["--cpu", "1", "--vm", "1", "--vm-bytes", "64M", "--timeout", "3600s"]
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: http-load-test
+  namespace: sample-app
+spec:
+  parallelism: 3
+  completions: 10
+  template:
+    metadata:
+      labels:
+        app: http-load-test
+    spec:
+      containers:
+      - name: curl
+        image: curlimages/curl:latest
+        command: ["/bin/sh"]
+        args:
+        - "-c"
+        - |
+          for i in $(seq 1 1000); do
+            curl -s -o /dev/null http://nginx-sample-service.sample-app.svc.cluster.local
+            sleep 0.1
+          done
+        resources:
+          requests:
+            cpu: "25m"
+            memory: "32Mi"
+          limits:
+            cpu: "50m"
+            memory: "64Mi"
+      restartPolicy: Never
+  backoffLimit: 4

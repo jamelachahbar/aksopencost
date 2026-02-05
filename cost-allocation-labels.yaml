@@ -1,0 +1,122 @@
+# ============================================================================
+# OpenCost Cost Allocation Labels - Example Workloads
+#
+# Apply these labels to your Kubernetes workloads to enable cost allocation
+# by team, project, environment, and cost center.
+#
+# Usage:
+#   kubectl apply -f cost-allocation-labels.yaml
+# ============================================================================
+
+# Example 1: Label existing deployments with kubectl
+# kubectl label deployment nginx-sample -n sample-app team=platform project=demo environment=dev cost-center=CC-1001
+
+---
+# Example 2: Deployment with cost allocation labels
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-service
+  namespace: sample-app
+  labels:
+    # Standard Kubernetes labels
+    app: api-service
+    version: v1.0.0
+    # Cost allocation labels
+    team: backend
+    project: customer-api
+    environment: production
+    cost-center: CC-2001
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: api-service
+  template:
+    metadata:
+      labels:
+        app: api-service
+        # Cost allocation labels (must be on pod template too)
+        team: backend
+        project: customer-api
+        environment: production
+        cost-center: CC-2001
+    spec:
+      containers:
+      - name: api
+        image: nginx:alpine
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "256Mi"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-frontend
+  namespace: sample-app
+  labels:
+    app: web-frontend
+    team: frontend
+    project: customer-portal
+    environment: production
+    cost-center: CC-2002
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: web-frontend
+  template:
+    metadata:
+      labels:
+        app: web-frontend
+        team: frontend
+        project: customer-portal
+        environment: production
+        cost-center: CC-2002
+    spec:
+      containers:
+      - name: web
+        image: nginx:alpine
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "64Mi"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: data-processor
+  namespace: sample-app
+  labels:
+    app: data-processor
+    team: data
+    project: analytics-pipeline
+    environment: production
+    cost-center: CC-3001
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: data-processor
+  template:
+    metadata:
+      labels:
+        app: data-processor
+        team: data
+        project: analytics-pipeline
+        environment: production
+        cost-center: CC-3001
+    spec:
+      containers:
+      - name: processor
+        image: redis:alpine
+        resources:
+          requests:
+            cpu: "200m"
+            memory: "256Mi"

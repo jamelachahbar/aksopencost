@@ -1,0 +1,109 @@
+# ============================================================================
+# OpenCost on AKS - Git Ignore File
+# ============================================================================
+
+# =========================
+# SECRETS - NEVER COMMIT!
+# =========================
+# Service principal credentials
+service-key.json
+**/service-key.json
+
+# Cloud integration config with storage keys
+cloud-integration.json
+**/cloud-integration.json
+
+# Any file with 'secret' in the name
+*secret*
+*Secret*
+*SECRET*
+
+# Any file with 'key' in the name (but not .yaml files)
+*.key
+*-key.json
+
+# Azure credentials
+*.cred
+*.credentials
+
+# =========================
+# Generated/Dynamic Files
+# =========================
+# Cost export data
+exports/
+**/exports/
+
+# Helm generated files (regenerated on each run)
+opencost-values.yaml
+opencost-values-updated.yaml
+opencost-cloud-costs-values.yaml
+opencost-role.json
+
+# Cost allocation rules (contains environment-specific data)
+cost-allocation-rules.json
+
+# Terraform state
+*.tfstate
+*.tfstate.*
+.terraform/
+
+# =========================
+# IDE and Editor Files
+# =========================
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+
+# =========================
+# OS Generated Files
+# =========================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# =========================
+# PowerShell
+# =========================
+*.ps1xml
+
+# =========================
+# Logs
+# =========================
+*.log
+logs/
+
+# =========================
+# Temporary Files
+# =========================
+tmp/
+temp/
+*.tmp
+*.temp
+*.bak
+
+# =========================
+# Node (if using any JS tools)
+# =========================
+node_modules/
+npm-debug.log*
+
+# =========================
+# Python (if using for parquet conversion)
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+venv/
+ENV/

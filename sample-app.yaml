@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-sample
+  namespace: sample-app
+  labels:
+    app: nginx-sample
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx-sample
+  template:
+    metadata:
+      labels:
+        app: nginx-sample
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "250m"
+            memory: "256Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-sample-service
+  namespace: sample-app
+spec:
+  type: LoadBalancer
+  selector:
+    app: nginx-sample
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-sample
+  namespace: sample-app
+  labels:
+    app: redis-sample
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-sample
+  template:
+    metadata:
+      labels:
+        app: redis-sample
+    spec:
+      containers:
+      - name: redis
+        image: redis:alpine
+        ports:
+        - containerPort: 6379
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "64Mi"
+          limits:
+            cpu: "100m"
+            memory: "128Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-sample-service
+  namespace: sample-app
+spec:
+  type: ClusterIP
+  selector:
+    app: redis-sample
+  ports:
+    - protocol: TCP
+      port: 6379
+      targetPort: 6379
