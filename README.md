@@ -46,6 +46,16 @@ OpenCost is a CNCF sandbox project that provides real-time cost monitoring for K
 - **Kubernetes costs**: CPU, memory, storage, network by namespace/pod/deployment
 - **Cloud costs**: Full Azure billing data (VMs, storage, networking, services)
 
+### Screenshots
+
+#### Azure Cloud Costs Integration
+
+Once configured, OpenCost displays your full Azure billing data alongside Kubernetes costs:
+
+![Azure Cloud Costs in OpenCost](cloud-costs.png)
+
+*The Cloud Costs view shows actual Azure billing data including VMs, storage, networking, and all Azure services - not just Kubernetes compute costs.*
+
 ---
 
 ## Prerequisites
@@ -750,7 +760,15 @@ kubectl delete namespace sample-app
 | **README.md** | This documentation | Reference |
 | **.gitignore** | Prevents secrets from being committed | Always |
 
-### 🚫 Generated Files (Do NOT Commit - Auto-Created)
+### � Screenshots (Documentation)
+
+| File | Shows |
+|------|-------|
+| **cloud-costs.png** | Azure Cloud Costs integration view |
+| **imagedefaultcostallocation.png** | Default view with unallocated costs |
+| **imagecostallocation.png** | Costs with labels applied |
+
+### �🚫 Generated Files (Do NOT Commit - Auto-Created)
 
 | File | Contains | Created By |
 |------|----------|------------|
@@ -780,6 +798,22 @@ kubectl label deployment <name> -n <namespace> \
     project=customer-api \
     cost-center=CC-2001
 ```
+
+#### Default Cost View (Before Labels)
+
+Without cost allocation labels, costs appear as `__unallocated__` because OpenCost doesn't know which team or project owns the workload:
+
+![Default cost allocation - unallocated](imagedefaultcostallocation.png)
+
+*Costs show as unallocated when pods don't have team/project/cost-center labels applied.*
+
+#### Cost View with Labels Applied
+
+After running `setup-cost-allocation.ps1`, costs are properly attributed to teams and projects:
+
+![Cost allocation with labels](imagecostallocation.png)
+
+*With labels applied, you can see costs broken down by team, project, environment, or cost-center.*
 
 #### Viewing Label-Based Costs
 
