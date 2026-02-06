@@ -26,14 +26,14 @@ resource "azurerm_storage_container" "cost_export" {
 }
 
 # Cost Management Export
-resource "azurerm_cost_management_export_resource_group" "opencost" {
+resource "azurerm_resource_group_cost_management_export" "opencost" {
   count = var.enable_cloud_costs ? 1 : 0
 
-  name                    = var.cost_export_name
-  resource_group_id       = azurerm_resource_group.rg.id
-  recurrence_type         = "Daily"
-  recurrence_period_start = "${formatdate("YYYY-MM-DD", timestamp())}T00:00:00Z"
-  recurrence_period_end   = "${formatdate("YYYY-MM-DD", timeadd(timestamp(), "8760h"))}T00:00:00Z" # 1 year from now
+  name                         = var.cost_export_name
+  resource_group_id            = azurerm_resource_group.rg.id
+  recurrence_type              = "Daily"
+  recurrence_period_start_date = "${formatdate("YYYY-MM-DD", timestamp())}T00:00:00Z"
+  recurrence_period_end_date   = "${formatdate("YYYY-MM-DD", timeadd(timestamp(), "8760h"))}T00:00:00Z" # 1 year from now
 
   export_data_storage_location {
     container_id     = azurerm_storage_container.cost_export[0].resource_manager_id
