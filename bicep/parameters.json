@@ -1,0 +1,58 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "resourceGroupName": {
+      "value": "rg-opencost-demo"
+    },
+    "location": {
+      "value": "swedencentral"
+    },
+    "clusterName": {
+      "value": "aks-opencost-demo"
+    },
+    "nodeCount": {
+      "value": 2
+    },
+    "nodeVmSize": {
+      "value": "Standard_D2s_v5"
+    },
+    "kubernetesVersion": {
+      "value": ""
+    },
+    "networkPlugin": {
+      "value": "azure"
+    },
+    "networkPolicy": {
+      "value": "azure"
+    },
+    "enableAutoScaling": {
+      "value": false
+    },
+    "minNodeCount": {
+      "value": 2
+    },
+    "maxNodeCount": {
+      "value": 5
+    },
+    "enableCloudCosts": {
+      "value": true
+    },
+    "storageAccountNamePrefix": {
+      "value": "opencostexport"
+    },
+    "costExportName": {
+      "value": "opencost-daily"
+    },
+    "costExportContainerName": {
+      "value": "cost-exports"
+    },
+    "tags": {
+      "value": {
+        "Environment": "Demo",
+        "ManagedBy": "Bicep",
+        "Purpose": "OpenCost"
+      }
+    }
+  }
+}

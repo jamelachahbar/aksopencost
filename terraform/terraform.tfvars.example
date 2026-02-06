@@ -1,0 +1,39 @@
+# Example Terraform variables file
+# Copy this file to terraform.tfvars and customize as needed
+
+# Resource Group Configuration
+resource_group_name = "rg-opencost-demo"
+location            = "swedencentral"
+
+# AKS Cluster Configuration
+cluster_name       = "aks-opencost-demo"
+node_count         = 2
+node_vm_size       = "Standard_D2s_v5"
+kubernetes_version = null # Use latest stable version
+
+# Network Configuration
+network_plugin = "azure" # Options: azure, kubenet
+network_policy = "azure" # Options: azure, calico, cilium
+
+# Auto-scaling Configuration
+enable_auto_scaling = false
+min_node_count      = 2
+max_node_count      = 5
+
+# Cloud Costs Configuration
+enable_cloud_costs          = true
+storage_account_name_prefix = "opencostexport"
+cost_export_name            = "opencost-daily"
+cost_export_container_name  = "cost-exports"
+
+# Helm Chart Versions
+prometheus_version = "25.8.0"
+opencost_version   = "1.26.0"
+
+# Tags
+tags = {
+  Environment = "Demo"
+  ManagedBy   = "Terraform"
+  Purpose     = "OpenCost"
+  Owner       = "Platform Team"
+}

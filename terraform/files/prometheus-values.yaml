@@ -1,0 +1,24 @@
+# Prometheus scrape configuration for OpenCost
+extraScrapeConfigs: |
+  - job_name: opencost
+    honor_labels: true
+    scrape_interval: 1m
+    scrape_timeout: 10s
+    metrics_path: /metrics
+    scheme: http
+    dns_sd_configs:
+    - names:
+      - opencost.opencost
+      type: 'A'
+      port: 9003
+  - job_name: opencost-networking-costs
+    honor_labels: true
+    scrape_interval: 1m
+    scrape_timeout: 10s
+    metrics_path: /metrics
+    scheme: http
+    dns_sd_configs:
+    - names:
+      - opencost.opencost
+      type: 'A'
+      port: 9005
