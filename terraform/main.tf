@@ -202,29 +202,57 @@ resource "helm_release" "opencost" {
   values = [
     yamlencode({
       opencost = {
-        exporter = {
-          extraVolumeMounts = [
-            {
-              mountPath = "/var/secrets"
-              name      = "service-key-secret"
+        exporter = merge(
+          {
+            extraVolumeMounts = concat(
+              [
+                {
+                  mountPath = "/var/secrets"
+                  name      = "service-key-secret"
+                }
+              ],
+              var.enable_cloud_costs ? [
+                {
+                  mountPath = "/var/azure-storage-config"
+                  name      = "azure-storage-config"
+                }
+              ] : []
+            )
+          },
+          var.enable_cloud_costs ? {
+            extraEnv = {
+              AZURE_STORAGE_ACCOUNT   = azurerm_storage_account.cost_export[0].name
+              AZURE_STORAGE_CONTAINER = var.cost_export_container_name
+              AZURE_CONTAINER_PATH    = "/subscriptions/${data.azurerm_subscription.current.subscription_id}"
             }
-          ]
-        }
+          } : {}
+        )
       }
-      extraVolumes = [
-        {
-          name = "service-key-secret"
-          secret = {
-            secretName = kubernetes_secret.azure_service_key.metadata[0].name
+      extraVolumes = concat(
+        [
+          {
+            name = "service-key-secret"
+            secret = {
+              secretName = kubernetes_secret.azure_service_key.metadata[0].name
+            }
           }
-        }
-      ]
+        ],
+        var.enable_cloud_costs ? [
+          {
+            name = "azure-storage-config"
+            secret = {
+              secretName = kubernetes_secret.azure_storage_config[0].metadata[0].name
+            }
+          }
+        ] : []
+      )
     })
   ]
 
   depends_on = [
     helm_release.prometheus,
-    kubernetes_secret.azure_service_key
+    kubernetes_secret.azure_service_key,
+    kubernetes_secret.azure_storage_config
   ]
 }
 
