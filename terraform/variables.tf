@@ -109,3 +109,41 @@ variable "opencost_version" {
   type        = string
   default     = "1.26.0"
 }
+
+# Allocation Export Variables
+variable "enable_allocation_export" {
+  description = "Enable CronJob to export OpenCost allocation data to Azure Storage"
+  type        = bool
+  default     = true
+}
+
+variable "allocation_export_schedule" {
+  description = "Cron schedule for allocation export (default: daily at 2 AM UTC)"
+  type        = string
+  default     = "0 2 * * *"
+}
+
+variable "allocation_export_window" {
+  description = "Time window for allocation export (e.g., 24h, 7d, yesterday)"
+  type        = string
+  default     = "24h"
+}
+
+variable "allocation_export_aggregate" {
+  description = "Aggregation level for allocation export"
+  type        = string
+  default     = "namespace,controller,pod"
+}
+
+variable "allocation_export_container_name" {
+  description = "Name of the storage container for allocation exports"
+  type        = string
+  default     = "allocation-exports"
+}
+
+# Sample Applications Variables
+variable "deploy_sample_apps" {
+  description = "Deploy sample applications with cost allocation labels for demo purposes"
+  type        = bool
+  default     = true
+}

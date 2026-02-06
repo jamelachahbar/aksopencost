@@ -71,3 +71,50 @@ output "port_forward_commands" {
     prometheus = "kubectl port-forward --namespace prometheus-system service/prometheus-server 9080:80"
   }
 }
+
+# Allocation Export Outputs
+output "allocation_export_container_name" {
+  description = "Name of the storage container for allocation exports"
+  value       = var.enable_allocation_export ? var.allocation_export_container_name : null
+}
+
+output "allocation_export_schedule" {
+  description = "Cron schedule for allocation exports"
+  value       = var.enable_allocation_export ? var.allocation_export_schedule : null
+}
+
+output "allocation_export_cronjob_commands" {
+  description = "Commands to manage the allocation export CronJob"
+  value = var.enable_allocation_export ? {
+    check_status   = "kubectl get cronjob opencost-allocation-export -n opencost"
+    list_jobs      = "kubectl get jobs -n opencost -l app=opencost-allocation-export"
+    view_logs      = "kubectl logs -n opencost -l app=opencost-allocation-export --tail=100"
+    trigger_manual = "kubectl create job --from=cronjob/opencost-allocation-export manual-export-$(date +%s) -n opencost"
+  } : null
+}
+
+# Sample Applications Outputs
+output "sample_apps_deployed" {
+  description = "Sample applications deployed for cost allocation demo"
+  value = var.deploy_sample_apps ? {
+    namespace = "sample-app"
+    apps = {
+      "api-service"    = { team = "backend", cost_center = "CC-2001", replicas = 3 }
+      "web-frontend"   = { team = "frontend", cost_center = "CC-2002", replicas = 2 }
+      "data-processor" = { team = "data", cost_center = "CC-3001", replicas = 2 }
+      "ml-training"    = { team = "ml-engineering", cost_center = "CC-4001", replicas = 1 }
+      "shared-cache"   = { team = "platform", cost_center = "CC-1001", replicas = 2 }
+    }
+  } : null
+}
+
+output "cost_allocation_queries" {
+  description = "Example API queries for cost allocation"
+  value = {
+    by_cost_center = "/allocation/compute?window=7d&aggregate=label:cost-center"
+    by_team        = "/allocation/compute?window=7d&aggregate=label:team"
+    by_project     = "/allocation/compute?window=7d&aggregate=label:project"
+    by_environment = "/allocation/compute?window=7d&aggregate=label:environment"
+    multi_label    = "/allocation/compute?window=7d&aggregate=label:cost-center,label:team"
+  }
+}
