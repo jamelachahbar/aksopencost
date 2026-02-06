@@ -31,7 +31,7 @@ resource openCostRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' = {
       }
     ]
     assignableScopes: [
-      subscriptionId()
+      '/subscriptions/${subscriptionId}'
     ]
   }
 }

@@ -116,9 +116,6 @@ module servicePrincipal 'modules/service-principal.bicep' = {
     roleDefinitionId: openCostRole.outputs.roleDefinitionId
     subscriptionId: subscription().subscriptionId
   }
-  dependsOn: [
-    openCostRole
-  ]
 }
 
 // Storage Account and Cost Export Module (if enabled)
@@ -146,6 +143,6 @@ output servicePrincipalAppId string = servicePrincipal.outputs.appId
 output servicePrincipalPassword string = servicePrincipal.outputs.password
 output tenantId string = subscription().tenantId
 output subscriptionId string = subscription().subscriptionId
-output storageAccountName string = enableCloudCosts ? cloudCosts.outputs.storageAccountName : ''
-output storageAccountKey string = enableCloudCosts ? cloudCosts.outputs.storageAccountKey : ''
+output storageAccountName string = enableCloudCosts ? cloudCosts!.outputs.storageAccountName : ''
+output storageAccountKey string = enableCloudCosts ? cloudCosts!.outputs.storageAccountKey : ''
 output costExportContainerName string = enableCloudCosts ? costExportContainerName : ''

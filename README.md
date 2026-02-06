@@ -2,6 +2,13 @@
 
 A complete, **fully automated** solution for deploying [OpenCost](https://www.opencost.io/) on Azure Kubernetes Service with **Azure Cloud Costs** integration.
 
+**Multiple Deployment Options Available:**
+- 🚀 **PowerShell Scripts** - Quick deployment with automated scripts (original implementation)
+- 🏗️ **Terraform** - Infrastructure as Code for reproducible deployments
+- 🔷 **Bicep** - Azure-native IaC with best practices
+
+Choose the deployment method that best fits your workflow!
+
 ## 📋 Table of Contents
 
 - [Overview](#overview)
@@ -221,7 +228,17 @@ container-name/
 
 ## Quick Start
 
-### Option 1: Single Command (Recommended)
+### Choose Your Deployment Method
+
+This repository provides three deployment options. Choose the one that best fits your needs:
+
+| Method | Best For | Time | Complexity |
+|--------|----------|------|------------|
+| **PowerShell Scripts** | Quick demos, learning OpenCost | ~15 min | 🟢 Easy |
+| **Terraform** | Multi-cloud, GitOps, state management | ~20 min | 🟡 Medium |
+| **Bicep** | Azure-native, enterprise standards | ~20 min | 🟡 Medium |
+
+### Option 1: PowerShell Scripts (Recommended for Quick Start)
 
 Deploy everything with one command - no manual steps required:
 
@@ -242,7 +259,53 @@ The script will:
 6. ✅ Configure cloud costs integration
 7. ✅ Verify the deployment
 
-### Option 2: Step-by-Step Deployment
+### Option 2: Terraform Deployment
+
+Use Terraform for Infrastructure as Code deployment:
+
+```bash
+# Navigate to Terraform directory
+cd terraform/
+
+# Copy example variables
+cp terraform.tfvars.example terraform.tfvars
+
+# Initialize Terraform
+terraform init
+
+# Plan the deployment
+terraform plan
+
+# Apply the deployment
+terraform apply
+```
+
+**See [terraform/README.md](terraform/README.md) for detailed instructions.**
+
+### Option 3: Bicep Deployment
+
+Use Bicep for Azure-native Infrastructure as Code:
+
+```powershell
+# Navigate to Bicep directory
+cd bicep/
+
+# Copy example parameters
+cp parameters.example.json parameters.json
+
+# Deploy with PowerShell script
+.\deploy.ps1
+
+# Or deploy directly with Azure CLI
+az deployment sub create \
+  --location swedencentral \
+  --template-file main.bicep \
+  --parameters @parameters.json
+```
+
+**See [bicep/README.md](bicep/README.md) for detailed instructions.**
+
+### Option 4: Step-by-Step PowerShell Deployment
 
 ```powershell
 # 1. Deploy AKS + Prometheus + OpenCost
@@ -735,6 +798,37 @@ helm uninstall prometheus -n prometheus-system
 kubectl delete namespace opencost
 kubectl delete namespace prometheus-system
 kubectl delete namespace sample-app
+```
+
+---
+
+## Deployment Comparison
+
+### Which Deployment Method Should I Use?
+
+| Criteria | PowerShell Scripts | Terraform | Bicep |
+|----------|-------------------|-----------|-------|
+| **Best For** | Quick demos, learning | Multi-cloud, GitOps | Azure-native, enterprise |
+| **Setup Time** | 🟢 15 min | 🟡 20 min | 🟡 20 min |
+| **Complexity** | 🟢 Easy | 🟡 Medium | 🟡 Medium |
+| **State Management** | ❌ None | ✅ Yes | ✅ Azure-managed |
+| **Infrastructure as Code** | ⚠️ Scripts | ✅ Yes | ✅ Yes |
+| **Multi-cloud Support** | ❌ Azure only | ✅ Yes | ❌ Azure only |
+| **Azure Integration** | ✅ Excellent | 🟡 Good | ✅ Excellent |
+| **Learning Curve** | 🟢 Low | 🟡 Medium | 🟡 Medium |
+| **Maintenance** | 🟡 Manual | ✅ Automated | ✅ Automated |
+| **Idempotent** | ⚠️ Partial | ✅ Yes | ✅ Yes |
+
+### Deployment Structure
+
+All three methods deploy the same resources:
+
+```
+terraform/          # Terraform implementation (HCL)
+│
+bicep/             # Bicep implementation (ARM template)
+│
+(root)             # PowerShell scripts (original)
 ```
 
 ---

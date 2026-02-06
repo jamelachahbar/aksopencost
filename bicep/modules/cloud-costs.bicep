@@ -22,6 +22,9 @@ param subscriptionId string
 @description('Tags for resources')
 param tags object
 
+@description('Current date time for recurrence period')
+param currentDateTime string = utcNow()
+
 // Storage Account for Cost Exports
 resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
   name: storageAccountName
@@ -63,8 +66,8 @@ resource costExport 'Microsoft.CostManagement/exports@2023-03-01' = {
     schedule: {
       recurrence: 'Daily'
       recurrencePeriod: {
-        from: utcNow('yyyy-MM-ddT00:00:00Z')
-        to: dateTimeAdd(utcNow('yyyy-MM-ddT00:00:00Z'), 'P1Y')
+        from: dateTimeAdd(currentDateTime, 'PT0H', 'yyyy-MM-ddT00:00:00Z')
+        to: dateTimeAdd(currentDateTime, 'P1Y', 'yyyy-MM-ddT00:00:00Z')
       }
       status: 'Active'
     }

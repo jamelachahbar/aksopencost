@@ -25,6 +25,7 @@ param subscriptionId string
 // 4. Assign the custom role to the service principal
 
 // Outputs (will be populated by deployment script)
-output appId string = ''
-output password string = ''
+// These are placeholders that will be overridden by the deployment script
+output appId string = 'placeholder-${displayName}'
+output password string = 'placeholder-${roleDefinitionId}-${subscriptionId}'
 output message string = 'Service principal must be created using deployment script (Azure CLI/PowerShell)'

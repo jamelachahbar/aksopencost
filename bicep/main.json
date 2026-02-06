@@ -1,0 +1,743 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.40.2.10011",
+      "templateHash": "9557970574420644614"
+    }
+  },
+  "parameters": {
+    "resourceGroupName": {
+      "type": "string",
+      "defaultValue": "rg-opencost-demo",
+      "metadata": {
+        "description": "Name of the resource group"
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "swedencentral",
+      "metadata": {
+        "description": "Azure region for resources"
+      }
+    },
+    "clusterName": {
+      "type": "string",
+      "defaultValue": "aks-opencost-demo",
+      "metadata": {
+        "description": "Name of the AKS cluster"
+      }
+    },
+    "nodeCount": {
+      "type": "int",
+      "defaultValue": 2,
+      "minValue": 1,
+      "maxValue": 100,
+      "metadata": {
+        "description": "Number of nodes in the default node pool"
+      }
+    },
+    "nodeVmSize": {
+      "type": "string",
+      "defaultValue": "Standard_D2s_v5",
+      "metadata": {
+        "description": "Size of the VMs in the default node pool"
+      }
+    },
+    "kubernetesVersion": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Kubernetes version for the AKS cluster (null = latest)"
+      }
+    },
+    "networkPlugin": {
+      "type": "string",
+      "defaultValue": "azure",
+      "allowedValues": [
+        "azure",
+        "kubenet"
+      ],
+      "metadata": {
+        "description": "Network plugin for AKS"
+      }
+    },
+    "networkPolicy": {
+      "type": "string",
+      "defaultValue": "azure",
+      "allowedValues": [
+        "azure",
+        "calico",
+        "cilium"
+      ],
+      "metadata": {
+        "description": "Network policy for AKS"
+      }
+    },
+    "enableAutoScaling": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Enable auto-scaling for the default node pool"
+      }
+    },
+    "minNodeCount": {
+      "type": "int",
+      "defaultValue": 2,
+      "metadata": {
+        "description": "Minimum number of nodes when auto-scaling is enabled"
+      }
+    },
+    "maxNodeCount": {
+      "type": "int",
+      "defaultValue": 5,
+      "metadata": {
+        "description": "Maximum number of nodes when auto-scaling is enabled"
+      }
+    },
+    "enableCloudCosts": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Enable Azure Cloud Costs integration"
+      }
+    },
+    "storageAccountNamePrefix": {
+      "type": "string",
+      "defaultValue": "opencostexport",
+      "metadata": {
+        "description": "Prefix for the storage account name"
+      }
+    },
+    "costExportName": {
+      "type": "string",
+      "defaultValue": "opencost-daily",
+      "metadata": {
+        "description": "Name of the cost export"
+      }
+    },
+    "costExportContainerName": {
+      "type": "string",
+      "defaultValue": "cost-exports",
+      "metadata": {
+        "description": "Name of the storage container for cost exports"
+      }
+    },
+    "tags": {
+      "type": "object",
+      "defaultValue": {
+        "Environment": "Demo",
+        "ManagedBy": "Bicep",
+        "Purpose": "OpenCost"
+      },
+      "metadata": {
+        "description": "Tags to apply to all resources"
+      }
+    }
+  },
+  "variables": {
+    "uniqueSuffix": "[substring(uniqueString(subscription().subscriptionId, parameters('resourceGroupName')), 0, 4)]",
+    "storageAccountName": "[format('{0}{1}', parameters('storageAccountNamePrefix'), variables('uniqueSuffix'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/resourceGroups",
+      "apiVersion": "2023-07-01",
+      "name": "[parameters('resourceGroupName')]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]"
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "aks-deployment",
+      "resourceGroup": "[parameters('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "clusterName": {
+            "value": "[parameters('clusterName')]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "nodeCount": {
+            "value": "[parameters('nodeCount')]"
+          },
+          "nodeVmSize": {
+            "value": "[parameters('nodeVmSize')]"
+          },
+          "kubernetesVersion": {
+            "value": "[parameters('kubernetesVersion')]"
+          },
+          "networkPlugin": {
+            "value": "[parameters('networkPlugin')]"
+          },
+          "networkPolicy": {
+            "value": "[parameters('networkPolicy')]"
+          },
+          "enableAutoScaling": {
+            "value": "[parameters('enableAutoScaling')]"
+          },
+          "minNodeCount": {
+            "value": "[parameters('minNodeCount')]"
+          },
+          "maxNodeCount": {
+            "value": "[parameters('maxNodeCount')]"
+          },
+          "tags": {
+            "value": "[parameters('tags')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.40.2.10011",
+              "templateHash": "2256532925575528588"
+            }
+          },
+          "parameters": {
+            "clusterName": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the AKS cluster"
+              }
+            },
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "Azure region for the cluster"
+              }
+            },
+            "nodeCount": {
+              "type": "int",
+              "metadata": {
+                "description": "Number of nodes in the default node pool"
+              }
+            },
+            "nodeVmSize": {
+              "type": "string",
+              "metadata": {
+                "description": "Size of the VMs in the default node pool"
+              }
+            },
+            "kubernetesVersion": {
+              "type": "string",
+              "metadata": {
+                "description": "Kubernetes version (empty string = latest)"
+              }
+            },
+            "networkPlugin": {
+              "type": "string",
+              "allowedValues": [
+                "azure",
+                "kubenet"
+              ],
+              "metadata": {
+                "description": "Network plugin"
+              }
+            },
+            "networkPolicy": {
+              "type": "string",
+              "allowedValues": [
+                "azure",
+                "calico",
+                "cilium"
+              ],
+              "metadata": {
+                "description": "Network policy"
+              }
+            },
+            "enableAutoScaling": {
+              "type": "bool",
+              "metadata": {
+                "description": "Enable auto-scaling"
+              }
+            },
+            "minNodeCount": {
+              "type": "int",
+              "metadata": {
+                "description": "Minimum node count for auto-scaling"
+              }
+            },
+            "maxNodeCount": {
+              "type": "int",
+              "metadata": {
+                "description": "Maximum node count for auto-scaling"
+              }
+            },
+            "tags": {
+              "type": "object",
+              "metadata": {
+                "description": "Tags for the cluster"
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.ContainerService/managedClusters",
+              "apiVersion": "2023-10-01",
+              "name": "[parameters('clusterName')]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "identity": {
+                "type": "SystemAssigned"
+              },
+              "properties": {
+                "dnsPrefix": "[parameters('clusterName')]",
+                "kubernetesVersion": "[if(empty(parameters('kubernetesVersion')), null(), parameters('kubernetesVersion'))]",
+                "enableRBAC": true,
+                "agentPoolProfiles": [
+                  {
+                    "name": "default",
+                    "count": "[if(parameters('enableAutoScaling'), null(), parameters('nodeCount'))]",
+                    "vmSize": "[parameters('nodeVmSize')]",
+                    "osDiskSizeGB": 30,
+                    "osType": "Linux",
+                    "type": "VirtualMachineScaleSets",
+                    "mode": "System",
+                    "enableAutoScaling": "[parameters('enableAutoScaling')]",
+                    "minCount": "[if(parameters('enableAutoScaling'), parameters('minNodeCount'), null())]",
+                    "maxCount": "[if(parameters('enableAutoScaling'), parameters('maxNodeCount'), null())]"
+                  }
+                ],
+                "networkProfile": {
+                  "networkPlugin": "[parameters('networkPlugin')]",
+                  "networkPolicy": "[parameters('networkPolicy')]",
+                  "serviceCidr": "10.0.0.0/16",
+                  "dnsServiceIP": "10.0.0.10"
+                }
+              }
+            }
+          ],
+          "outputs": {
+            "clusterName": {
+              "type": "string",
+              "value": "[parameters('clusterName')]"
+            },
+            "clusterId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.ContainerService/managedClusters', parameters('clusterName'))]"
+            },
+            "clusterFqdn": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.ContainerService/managedClusters', parameters('clusterName')), '2023-10-01').fqdn]"
+            },
+            "kubeletIdentityObjectId": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.ContainerService/managedClusters', parameters('clusterName')), '2023-10-01').identityProfile.kubeletidentity.objectId]"
+            },
+            "identityPrincipalId": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.ContainerService/managedClusters', parameters('clusterName')), '2023-10-01', 'full').identity.principalId]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('resourceGroupName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "opencost-role-deployment",
+      "location": "[deployment().location]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "roleName": {
+            "value": "[format('OpenCostRole-{0}', variables('uniqueSuffix'))]"
+          },
+          "subscriptionId": {
+            "value": "[subscription().subscriptionId]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.40.2.10011",
+              "templateHash": "14921211605645404533"
+            }
+          },
+          "parameters": {
+            "roleName": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the custom role"
+              }
+            },
+            "subscriptionId": {
+              "type": "string",
+              "metadata": {
+                "description": "Subscription ID"
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Authorization/roleDefinitions",
+              "apiVersion": "2022-04-01",
+              "name": "[guid(parameters('roleName'), parameters('subscriptionId'))]",
+              "properties": {
+                "roleName": "[parameters('roleName')]",
+                "description": "Rate Card query role for OpenCost",
+                "type": "CustomRole",
+                "permissions": [
+                  {
+                    "actions": [
+                      "Microsoft.Compute/virtualMachines/vmSizes/read",
+                      "Microsoft.Resources/subscriptions/locations/read",
+                      "Microsoft.Resources/providers/read",
+                      "Microsoft.ContainerService/containerServices/read",
+                      "Microsoft.Commerce/RateCard/read"
+                    ],
+                    "notActions": [],
+                    "dataActions": [],
+                    "notDataActions": []
+                  }
+                ],
+                "assignableScopes": [
+                  "[format('/subscriptions/{0}', parameters('subscriptionId'))]"
+                ]
+              }
+            }
+          ],
+          "outputs": {
+            "roleDefinitionId": {
+              "type": "string",
+              "value": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', guid(parameters('roleName'), parameters('subscriptionId')))]"
+            },
+            "roleName": {
+              "type": "string",
+              "value": "[reference(subscriptionResourceId('Microsoft.Authorization/roleDefinitions', guid(parameters('roleName'), parameters('subscriptionId'))), '2022-04-01').roleName]"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "service-principal-deployment",
+      "location": "[deployment().location]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "displayName": {
+            "value": "[format('OpenCostAccess-{0}', variables('uniqueSuffix'))]"
+          },
+          "roleDefinitionId": {
+            "value": "[reference(subscriptionResourceId('Microsoft.Resources/deployments', 'opencost-role-deployment'), '2025-04-01').outputs.roleDefinitionId.value]"
+          },
+          "subscriptionId": {
+            "value": "[subscription().subscriptionId]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.40.2.10011",
+              "templateHash": "15777605781266191687"
+            }
+          },
+          "parameters": {
+            "displayName": {
+              "type": "string",
+              "metadata": {
+                "description": "Display name for the service principal"
+              }
+            },
+            "roleDefinitionId": {
+              "type": "string",
+              "metadata": {
+                "description": "Role definition ID to assign"
+              }
+            },
+            "subscriptionId": {
+              "type": "string",
+              "metadata": {
+                "description": "Subscription ID"
+              }
+            }
+          },
+          "resources": [],
+          "outputs": {
+            "appId": {
+              "type": "string",
+              "value": "[format('placeholder-{0}', parameters('displayName'))]"
+            },
+            "password": {
+              "type": "string",
+              "value": "[format('placeholder-{0}-{1}', parameters('roleDefinitionId'), parameters('subscriptionId'))]"
+            },
+            "message": {
+              "type": "string",
+              "value": "Service principal must be created using deployment script (Azure CLI/PowerShell)"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[subscriptionResourceId('Microsoft.Resources/deployments', 'opencost-role-deployment')]"
+      ]
+    },
+    {
+      "condition": "[parameters('enableCloudCosts')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "cloud-costs-deployment",
+      "resourceGroup": "[parameters('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "storageAccountName": {
+            "value": "[variables('storageAccountName')]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "containerName": {
+            "value": "[parameters('costExportContainerName')]"
+          },
+          "costExportName": {
+            "value": "[parameters('costExportName')]"
+          },
+          "resourceGroupName": {
+            "value": "[parameters('resourceGroupName')]"
+          },
+          "subscriptionId": {
+            "value": "[subscription().subscriptionId]"
+          },
+          "tags": {
+            "value": "[union(parameters('tags'), createObject('SecurityControl', 'ignore'))]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.40.2.10011",
+              "templateHash": "3146512471678772487"
+            }
+          },
+          "parameters": {
+            "storageAccountName": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the storage account"
+              }
+            },
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "Azure region"
+              }
+            },
+            "containerName": {
+              "type": "string",
+              "metadata": {
+                "description": "Container name for cost exports"
+              }
+            },
+            "costExportName": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the cost export"
+              }
+            },
+            "resourceGroupName": {
+              "type": "string",
+              "metadata": {
+                "description": "Resource group name"
+              }
+            },
+            "subscriptionId": {
+              "type": "string",
+              "metadata": {
+                "description": "Subscription ID"
+              }
+            },
+            "tags": {
+              "type": "object",
+              "metadata": {
+                "description": "Tags for resources"
+              }
+            },
+            "currentDateTime": {
+              "type": "string",
+              "defaultValue": "[utcNow()]",
+              "metadata": {
+                "description": "Current date time for recurrence period"
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Storage/storageAccounts",
+              "apiVersion": "2023-01-01",
+              "name": "[parameters('storageAccountName')]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "kind": "StorageV2",
+              "sku": {
+                "name": "Standard_LRS"
+              },
+              "properties": {
+                "accessTier": "Hot",
+                "isHnsEnabled": true,
+                "allowSharedKeyAccess": true,
+                "supportsHttpsTrafficOnly": true,
+                "minimumTlsVersion": "TLS1_2"
+              }
+            },
+            {
+              "type": "Microsoft.Storage/storageAccounts/blobServices",
+              "apiVersion": "2023-01-01",
+              "name": "[format('{0}/{1}', parameters('storageAccountName'), 'default')]",
+              "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+              "apiVersion": "2023-01-01",
+              "name": "[format('{0}/{1}/{2}', parameters('storageAccountName'), 'default', parameters('containerName'))]",
+              "properties": {
+                "publicAccess": "None"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccountName'), 'default')]"
+              ]
+            },
+            {
+              "type": "Microsoft.CostManagement/exports",
+              "apiVersion": "2023-03-01",
+              "name": "[parameters('costExportName')]",
+              "properties": {
+                "schedule": {
+                  "recurrence": "Daily",
+                  "recurrencePeriod": {
+                    "from": "[dateTimeAdd(parameters('currentDateTime'), 'PT0H', 'yyyy-MM-ddT00:00:00Z')]",
+                    "to": "[dateTimeAdd(parameters('currentDateTime'), 'P1Y', 'yyyy-MM-ddT00:00:00Z')]"
+                  },
+                  "status": "Active"
+                },
+                "format": "Csv",
+                "deliveryInfo": {
+                  "destination": {
+                    "resourceId": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]",
+                    "container": "[parameters('containerName')]",
+                    "rootFolderPath": "[format('/subscriptions/{0}', parameters('subscriptionId'))]"
+                  }
+                },
+                "definition": {
+                  "type": "ActualCost",
+                  "timeframe": "MonthToDate",
+                  "dataSet": {
+                    "granularity": "Daily",
+                    "configuration": {
+                      "columns": []
+                    }
+                  }
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices/containers', parameters('storageAccountName'), 'default', parameters('containerName'))]",
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+              ]
+            }
+          ],
+          "outputs": {
+            "storageAccountName": {
+              "type": "string",
+              "value": "[parameters('storageAccountName')]"
+            },
+            "storageAccountKey": {
+              "type": "string",
+              "value": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2023-01-01').keys[0].value]"
+            },
+            "containerName": {
+              "type": "string",
+              "value": "[parameters('containerName')]"
+            },
+            "costExportName": {
+              "type": "string",
+              "value": "[parameters('costExportName')]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('resourceGroupName'))]"
+      ]
+    }
+  ],
+  "outputs": {
+    "resourceGroupName": {
+      "type": "string",
+      "value": "[parameters('resourceGroupName')]"
+    },
+    "aksClusterName": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'aks-deployment'), '2025-04-01').outputs.clusterName.value]"
+    },
+    "aksClusterId": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'aks-deployment'), '2025-04-01').outputs.clusterId.value]"
+    },
+    "servicePrincipalAppId": {
+      "type": "string",
+      "value": "[reference(subscriptionResourceId('Microsoft.Resources/deployments', 'service-principal-deployment'), '2025-04-01').outputs.appId.value]"
+    },
+    "servicePrincipalPassword": {
+      "type": "string",
+      "value": "[reference(subscriptionResourceId('Microsoft.Resources/deployments', 'service-principal-deployment'), '2025-04-01').outputs.password.value]"
+    },
+    "tenantId": {
+      "type": "string",
+      "value": "[subscription().tenantId]"
+    },
+    "subscriptionId": {
+      "type": "string",
+      "value": "[subscription().subscriptionId]"
+    },
+    "storageAccountName": {
+      "type": "string",
+      "value": "[if(parameters('enableCloudCosts'), reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'cloud-costs-deployment'), '2025-04-01').outputs.storageAccountName.value, '')]"
+    },
+    "storageAccountKey": {
+      "type": "string",
+      "value": "[if(parameters('enableCloudCosts'), reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'cloud-costs-deployment'), '2025-04-01').outputs.storageAccountKey.value, '')]"
+    },
+    "costExportContainerName": {
+      "type": "string",
+      "value": "[if(parameters('enableCloudCosts'), parameters('costExportContainerName'), '')]"
+    }
+  }
+}
